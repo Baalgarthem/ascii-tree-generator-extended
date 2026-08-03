@@ -1,0 +1,11 @@
+{
+  "language": "es",
+  "dashCount": 2,
+  "autoAppendSlash": true,
+  "treeStyle": "slim",
+  "enableLinkHover": true,
+  "linkHoverStyle": "pill",
+  "enableTitleFormat": true,
+  "titleFontSize": "1.15em",
+  "titleSpacing": 0
+}
