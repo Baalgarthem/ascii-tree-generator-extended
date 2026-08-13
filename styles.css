@@ -13,6 +13,51 @@
   margin-bottom: var(--ascii-tree-title-margin-bottom, 12px);
 }
 
+/* ── Vertical Organigram tree block container (tree-v) ────────── */
+pre.ascii-tree-block.ascii-tree-v {
+  overflow-x: auto;
+  white-space: pre;
+}
+
+pre.ascii-tree-block.ascii-tree-v.ascii-tree-center {
+  text-align: center;
+}
+
+pre.ascii-tree-block.ascii-tree-v.ascii-tree-center > code {
+  display: inline-block;
+  text-align: left;
+}
+
+/* ── Synoptic tree block container (tree-k) ────────────────────── */
+pre.ascii-tree-block.ascii-tree-k {
+  overflow-x: auto;
+  white-space: pre;
+}
+
+pre.ascii-tree-block.ascii-tree-k.ascii-tree-center {
+  text-align: center;
+}
+
+pre.ascii-tree-block.ascii-tree-k.ascii-tree-center > code {
+  display: inline-block;
+  text-align: left;
+}
+
+/* ── Empty tree block placeholder styling ─────────────────────── */
+pre.ascii-tree-block.ascii-tree-empty {
+  min-height: 28px;
+  padding: 4px 8px;
+}
+
+.ascii-tree-ghost-placeholder {
+  opacity: 0.65;
+  font-style: italic;
+  color: var(--text-muted);
+  border-left: 2px dashed var(--text-muted);
+  padding-left: 8px;
+  display: inline-block;
+}
+
 /* ── Link base style within tree blocks ───────────────────────── */
 pre.ascii-tree-block .internal-link,
 pre.ascii-tree-block .glossary-link {

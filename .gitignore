@@ -1,0 +1,5 @@
+node_modules/
+main.js.map
+styles.css.map
+docs/
+.DS_Store
