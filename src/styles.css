@@ -1,0 +1,167 @@
+/* ASCII Tree Extended - Styles */
+
+:root {
+  --ascii-tree-title-font-size: 1.15em;
+  --ascii-tree-title-margin-bottom: 12px;
+}
+
+.ascii-tree-title {
+  display: block;
+  font-weight: 600;
+  line-height: 1.3;
+  font-size: var(--ascii-tree-title-font-size, 1.15em);
+  margin-bottom: var(--ascii-tree-title-margin-bottom, 12px);
+}
+
+/* ── Vertical Organigram tree block container (tree-v) ────────── */
+pre.ascii-tree-block.ascii-tree-v {
+  overflow-x: auto;
+  white-space: pre;
+}
+
+pre.ascii-tree-block.ascii-tree-v.ascii-tree-center {
+  text-align: center;
+}
+
+pre.ascii-tree-block.ascii-tree-v.ascii-tree-center > code {
+  display: inline-block;
+  text-align: left;
+}
+
+/* ── Synoptic tree block container (tree-k) ────────────────────── */
+pre.ascii-tree-block.ascii-tree-k {
+  overflow-x: auto;
+  white-space: pre;
+}
+
+pre.ascii-tree-block.ascii-tree-k.ascii-tree-center {
+  text-align: center;
+}
+
+pre.ascii-tree-block.ascii-tree-k.ascii-tree-center > code {
+  display: inline-block;
+  text-align: left;
+}
+
+/* ── Empty tree block placeholder styling ─────────────────────── */
+pre.ascii-tree-block.ascii-tree-empty {
+  min-height: 28px;
+  padding: 4px 8px;
+}
+
+.ascii-tree-ghost-placeholder {
+  opacity: 0.65;
+  font-style: italic;
+  color: var(--text-muted);
+  border-left: 2px dashed var(--text-muted);
+  padding-left: 8px;
+  display: inline-block;
+}
+
+/* ── Link base style within tree blocks ───────────────────────── */
+pre.ascii-tree-block .internal-link,
+pre.ascii-tree-block .glossary-link {
+  color: var(--link-color, var(--interactive-accent));
+  text-decoration: none;
+  cursor: pointer;
+  transition: font-weight 0.12s ease,
+              background 0.12s ease,
+              color 0.12s ease,
+              outline 0.12s ease,
+              text-shadow 0.15s ease,
+              padding 0.1s ease;
+}
+
+/* ── 1. Bold (Negrita) ──────────────────────────────────────────  */
+.ascii-tree-hover-bold .internal-link:hover,
+.ascii-tree-hover-bold .glossary-link:hover {
+  font-weight: bold !important;
+  text-decoration: none;
+}
+
+/* ── 2. Border (Recuadro) ───────────────────────────────────────  */
+.ascii-tree-hover-border .internal-link:hover,
+.ascii-tree-hover-border .glossary-link:hover {
+  outline: 1.5px solid var(--interactive-accent, #705dcf);
+  border-radius: 3px;
+  padding: 0 3px;
+  text-decoration: none;
+}
+
+/* ── 3. Underline animado ───────────────────────────────────────  */
+pre.ascii-tree-block .ascii-tree-hover-underline-wrapper .internal-link,
+pre.ascii-tree-block .ascii-tree-hover-underline-wrapper .glossary-link {
+  text-decoration: underline transparent;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s ease;
+}
+.ascii-tree-hover-underline .internal-link:hover,
+.ascii-tree-hover-underline .glossary-link:hover {
+  text-decoration: underline var(--interactive-accent, #705dcf);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* ── 4. Highlight (Marcador de texto) ───────────────────────────  */
+.ascii-tree-hover-highlight .internal-link:hover,
+.ascii-tree-hover-highlight .glossary-link:hover {
+  background: color-mix(in srgb, var(--interactive-accent, #705dcf) 22%, transparent);
+  border-radius: 3px;
+  padding: 0 3px;
+  text-decoration: none;
+}
+
+/* ── 5. Glow (Iluminación suave) ────────────────────────────────  */
+.ascii-tree-hover-glow .internal-link:hover,
+.ascii-tree-hover-glow .glossary-link:hover {
+  color: var(--interactive-accent, #705dcf) !important;
+  text-shadow:
+    0 0 6px color-mix(in srgb, var(--interactive-accent, #705dcf) 70%, transparent),
+    0 0 14px color-mix(in srgb, var(--interactive-accent, #705dcf) 40%, transparent);
+  text-decoration: none;
+}
+
+/* ── 6. Pill (Pastilla sólida) ──────────────────────────────────  */
+.ascii-tree-hover-pill .internal-link:hover,
+.ascii-tree-hover-pill .glossary-link:hover {
+  background: var(--interactive-accent, #705dcf);
+  color: var(--text-on-accent, #ffffff) !important;
+  border-radius: 999px;
+  padding: 0 7px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* ── 7. Neon ─────────────────────────────────────────────────────  */
+.ascii-tree-hover-neon .internal-link:hover,
+.ascii-tree-hover-neon .glossary-link:hover {
+  color: #7efff5 !important;
+  text-shadow:
+    0 0 4px #7efff5,
+    0 0 10px #00c8ff,
+    0 0 20px #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* ── 8. Ghost (Fantasma - dashed frame) ─────────────────────────  */
+.ascii-tree-hover-ghost .internal-link:hover,
+.ascii-tree-hover-ghost .glossary-link:hover {
+  background: var(--background-modifier-hover, rgba(112, 93, 207, 0.08));
+  outline: 1px dashed var(--interactive-accent, #705dcf);
+  border-radius: 4px;
+  padding: 0 3px;
+  text-decoration: none;
+}
+
+/* ── 9. Bold + Glow (Doble efecto) ─────────────────────────────  */
+.ascii-tree-hover-boldglow .internal-link:hover,
+.ascii-tree-hover-boldglow .glossary-link:hover {
+  font-weight: bold !important;
+  color: var(--interactive-accent, #705dcf) !important;
+  text-shadow:
+    0 0 5px color-mix(in srgb, var(--interactive-accent, #705dcf) 60%, transparent),
+    0 0 12px color-mix(in srgb, var(--interactive-accent, #705dcf) 30%, transparent);
+  text-decoration: none;
+}
