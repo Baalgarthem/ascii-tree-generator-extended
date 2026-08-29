@@ -111,10 +111,11 @@ export function renderLineContent(container: HTMLElement, text: string, noteMapI
       display = match[3];
       target = match[4];
     }
+    const encodedTarget = encodeURI(target);
     const a = container.createEl("a", {
       text: display,
       cls: "internal-link",
-      attr: { "data-href": target, href: target }
+      attr: { "data-href": encodedTarget, href: encodedTarget }
     });
     a.addEventListener("click", (evt) => {
       evt.preventDefault();

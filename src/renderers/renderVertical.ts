@@ -27,10 +27,18 @@ export function renderTreeVertical(
     
     // Add extra properties for Vertical render
     for (const node of nodes) {
-      const lines = wrapText(node.text, 24);
-      const visLen = Math.max(...lines.map((l) => getVisibleTextLength(l)));
-      node.lines = lines;
-      node.visLen = visLen;
+      // Preserve wiki links (e.g., [[target|display]]) without wrapping, otherwise wrap normally
+        if (node.text.includes('[[') && node.text.includes(']]')) {
+          // Extract display text from wiki link [[target|display]] or [[target]]
+          const match = node.text.match(/\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/);
+          const display = match ? (match[2] || match[1]) : node.text;
+          node.lines = [display];
+          node.visLen = getVisibleTextLength(display);
+        } else {
+          const lines = wrapText(node.text, 24);
+          node.lines = lines;
+          node.visLen = Math.max(...lines.map((l) => getVisibleTextLength(l)));
+        }
       node.startX = 0;
       node.centerX = 0;
       node.subtreeWidth = 0;
