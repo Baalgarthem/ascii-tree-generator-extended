@@ -29,15 +29,16 @@ export function renderTreeVertical(
     for (const node of nodes) {
       // Preserve wiki links (e.g., [[target|display]]) without wrapping, otherwise wrap normally
         if (node.text.includes('[[') && node.text.includes(']]')) {
-          // Extract display text from wiki link [[target|display]] or [[target]]
+          // Extract display text for layout; preserve full wiki syntax for link rendering
           const match = node.text.match(/\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/);
           const display = match ? (match[2] || match[1]) : node.text;
           node.lines = [display];
           node.visLen = getVisibleTextLength(display);
+          node.wikiText = node.text; // preserved for renderLineContent
         } else {
           const lines = wrapText(node.text, 24);
           node.lines = lines;
-          node.visLen = Math.max(...lines.map((l) => getVisibleTextLength(l)));
+          node.visLen = Math.max(...lines.map((l: string) => getVisibleTextLength(l)));
         }
       node.startX = 0;
       node.centerX = 0;
@@ -216,6 +217,20 @@ export function renderTreeVertical(
       }
     }
 
+    // Build a map of row → { display, wikiText } replacements for wiki link nodes
+    const wikiReplacements = new Map<number, { display: string; wikiText: string }[]>();
+    for (const node of nodes) {
+      if (node.wikiText) {
+        const d = node.depth;
+        const pY = depthStartY.get(d) || 0;
+        for (let lIdx = 0; lIdx < node.lines.length; lIdx++) {
+          const rowIdx = pY + lIdx;
+          if (!wikiReplacements.has(rowIdx)) wikiReplacements.set(rowIdx, []);
+          wikiReplacements.get(rowIdx)!.push({ display: node.lines[lIdx], wikiText: node.wikiText });
+        }
+      }
+    }
+
     const linesOutput = [];
     for (let r = 0; r < totalRows; r++) {
       const lineStr = grid[r].join("").replace(/\s+$/, "");
@@ -247,7 +262,16 @@ export function renderTreeVertical(
 
     for (let j = 0; j < linesOutput.length; j++) {
       const sp = document.createElement("span");
-      const lineText = linesOutput[j];
+      let lineText = linesOutput[j];
+
+      // Restore wiki link syntax so renderLineContent can create clickable anchors
+      const replacements = wikiReplacements.get(j);
+      if (replacements) {
+        for (const r of replacements) {
+          // Replace the plain display text in the grid line with the full [[target|display]] syntax
+          lineText = lineText.replace(r.display, r.wikiText);
+        }
+      }
 
       renderLineContent(sp, lineText, noteMapInfo, app);
 

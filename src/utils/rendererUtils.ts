@@ -111,15 +111,29 @@ export function renderLineContent(container: HTMLElement, text: string, noteMapI
       display = match[3];
       target = match[4];
     }
-    const encodedTarget = encodeURI(target);
+    // Use raw (non-encoded) target so Obsidian resolves the note correctly
     const a = container.createEl("a", {
       text: display,
       cls: "internal-link",
-      attr: { "data-href": encodedTarget, href: encodedTarget }
+      attr: {
+        "data-href": target,
+        href: target,
+        "target": "_blank",
+        "rel": "noopener"
+      }
     });
     a.addEventListener("click", (evt) => {
       evt.preventDefault();
       app.workspace.openLinkText(target, "", evt.metaKey || evt.ctrlKey);
+    });
+    a.addEventListener("mouseover", (evt) => {
+      app.workspace.trigger("hover-link", {
+        event: evt,
+        source: "preview",
+        hoverParent: container,
+        targetEl: a,
+        linktext: target,
+      });
     });
     lastIndex = wikiLinkRegex.lastIndex;
     if (match.index === wikiLinkRegex.lastIndex) {
