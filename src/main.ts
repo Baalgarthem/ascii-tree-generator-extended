@@ -5,6 +5,7 @@ import { AsciiTreeSettingTab } from "./settings/SettingsTab";
 import { renderTreeClassic } from "./renderers/renderClassic";
 import { renderTreeVertical } from "./renderers/renderVertical";
 import { renderTreeSynoptic } from "./renderers/renderSynoptic";
+import { addCodeblockActions } from "./utils/treeActions";
 
 export default class AsciiTreeGeneratorExtended extends Plugin {
   settings!: AsciiTreeSettings;
@@ -86,6 +87,9 @@ export default class AsciiTreeGeneratorExtended extends Plugin {
       ctx.addChild(comp);
     }
     this._renderTree(sourceText, containerEl, ctx, mode);
+    if (ctx) {
+      addCodeblockActions(this.app, containerEl, ctx, mode, sourceText, (key) => this.t(key));
+    }
   };
 
   _renderTree(sourceText: string, containerEl: HTMLElement, ctx: MarkdownPostProcessorContext | null, modeOverride: string | null = null) {

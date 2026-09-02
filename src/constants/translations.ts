@@ -60,6 +60,12 @@ export const TRANSLATIONS = {
     hoverNeon:      "⚡ Neón — brillo neón",
     hoverGhost:     "👻 Fantasma — marco punteado sutil",
     hoverBoldglow:  "✨ Negrita + Brillo — combinado",
+
+    // Code block actions
+    nextStyleTooltip: "Cambiar diseño (tree → tree-v → tree-k)",
+    sortTreeTooltip: "Ordenar alfabéticamente (alternar A-Z / Z-A)",
+    sortTreeTooltipAsc: "Ordenar alfabéticamente (A-Z)",
+    sortTreeTooltipDesc: "Ordenar alfabéticamente (Z-A)",
   },
   en: {
     // Language setting
@@ -122,5 +128,11 @@ export const TRANSLATIONS = {
     hoverNeon:      "⚡ Neon — neon glow",
     hoverGhost:     "👻 Ghost — subtle dashed frame",
     hoverBoldglow:  "✨ Bold + Glow — combined",
+
+    // Code block actions
+    nextStyleTooltip: "Change layout (tree → tree-v → tree-k)",
+    sortTreeTooltip: "Sort alphabetically (toggle A-Z / Z-A)",
+    sortTreeTooltipAsc: "Sort alphabetically (A-Z)",
+    sortTreeTooltipDesc: "Sort alphabetically (Z-A)",
   }
 };

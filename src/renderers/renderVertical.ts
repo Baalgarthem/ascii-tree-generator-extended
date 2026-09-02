@@ -249,6 +249,7 @@ export function renderTreeVertical(
     const preEl = containerEl.createEl("pre");
     preEl.addClass("ascii-tree-block");
     preEl.addClass("ascii-tree-v");
+    preEl.addClass("no-line-numbers");
     if (settings.centerTreeV) {
       preEl.addClass("ascii-tree-center");
     }

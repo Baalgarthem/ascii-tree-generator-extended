@@ -169,6 +169,7 @@ export function renderTreeSynoptic(
     const preEl = containerEl.createEl("pre");
     preEl.addClass("ascii-tree-block");
     preEl.addClass("ascii-tree-k");
+    preEl.addClass("no-line-numbers");
     if (settings.centerTreeK) {
       preEl.addClass("ascii-tree-center");
     }

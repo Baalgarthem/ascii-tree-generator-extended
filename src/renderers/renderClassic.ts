@@ -53,6 +53,7 @@ export function renderTreeClassic(
     containerEl.empty();
     const preEl = containerEl.createEl("pre");
     preEl.addClass("ascii-tree-block");
+    preEl.addClass("no-line-numbers");
 
     if (settings.enableLinkHover) {
       preEl.addClass("ascii-tree-hover-" + (settings.linkHoverStyle || "bold"));

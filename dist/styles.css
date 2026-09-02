@@ -13,6 +13,106 @@
   margin-bottom: var(--ascii-tree-title-margin-bottom, 12px);
 }
 
+/* ── Container wrapper & Action Toolbar ───────────────────────── */
+.block-language-tree,
+.block-language-tree-v,
+.block-language-tree-k,
+div[class*="block-language-tree"],
+.ascii-tree-wrapper {
+  position: relative !important;
+}
+
+.ascii-tree-codeblock-actions {
+  position: absolute;
+  top: 6px;
+  right: 68px; /* Offset to sit right next to Obsidian's native edit and copy buttons */
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+  pointer-events: none;
+}
+
+.block-language-tree:hover .ascii-tree-codeblock-actions,
+.block-language-tree-v:hover .ascii-tree-codeblock-actions,
+.block-language-tree-k:hover .ascii-tree-codeblock-actions,
+div[class*="block-language-tree"]:hover .ascii-tree-codeblock-actions,
+.ascii-tree-wrapper:hover .ascii-tree-codeblock-actions,
+.cm-embed-block:hover .ascii-tree-codeblock-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ascii-tree-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s, 4px);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 3px;
+  width: 24px;
+  height: 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: color 0.12s ease, background-color 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+}
+
+.ascii-tree-action-btn:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
+
+.ascii-tree-action-btn:active {
+  transform: scale(0.92);
+}
+
+.ascii-tree-action-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+/* ── Disable line numbers in Reading View & Preview ───────────── */
+.markdown-rendered pre.ascii-tree-block,
+.markdown-preview-view pre.ascii-tree-block,
+.markdown-rendered div[class*="block-language-tree"] pre,
+pre.ascii-tree-block,
+pre.ascii-tree-block code,
+pre.ascii-tree-block span,
+pre.ascii-tree-block code > span,
+.no-line-numbers pre,
+.no-line-numbers code {
+  counter-reset: none !important;
+  counter-increment: none !important;
+}
+
+.markdown-rendered pre.ascii-tree-block::before,
+.markdown-rendered pre.ascii-tree-block::after,
+.markdown-preview-view pre.ascii-tree-block::before,
+.markdown-preview-view pre.ascii-tree-block::after,
+pre.ascii-tree-block::before,
+pre.ascii-tree-block::after,
+pre.ascii-tree-block code::before,
+pre.ascii-tree-block code::after,
+pre.ascii-tree-block span::before,
+pre.ascii-tree-block span::after {
+  content: none !important;
+  display: none !important;
+}
+
+pre.ascii-tree-block .code-block-line-numbers,
+pre.ascii-tree-block .code-line-number,
+pre.ascii-tree-block .line-numbers,
+pre.ascii-tree-block .line-numbers-rows,
+pre.ascii-tree-block .hypermd-code-block-line-number {
+  display: none !important;
+}
+
 /* ── Vertical Organigram tree block container (tree-v) ────────── */
 pre.ascii-tree-block.ascii-tree-v {
   overflow-x: auto;
