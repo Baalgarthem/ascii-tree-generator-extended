@@ -1,6 +1,6 @@
 import { App } from "obsidian";
 import { SYNOPTIC_SYMBOLS } from "../constants/symbols";
-import { getVisibleTextLength, safeSetGrid, safeGetGrid, renderLineContent, renderEmptyBlockPlaceholder } from "../utils/rendererUtils";
+import { getVisibleTextLength, getCleanVisibleText, safeSetGrid, safeGetGrid, renderLineContent, renderEmptyBlockPlaceholder } from "../utils/rendererUtils";
 import { parseSourceText, buildNodeTree } from "../utils/treeParser";
 
 export function renderTreeSynoptic(
@@ -10,7 +10,8 @@ export function renderTreeSynoptic(
   dashCount: number, 
   noteMapInfo: any, 
   app: App,
-  t: (key: string) => string
+  t: (key: string) => string,
+  sourcePath: string = ""
 ): void {
   try {
     const o = settings.autoAppendSlash;
@@ -30,14 +31,23 @@ export function renderTreeSynoptic(
       node.startY = 0;
       node.endY = 0;
       node.centerY = 0;
-      node.visLen = getVisibleTextLength(node.text);
+      if (node.text.includes('[[') && node.text.includes(']]')) {
+        const display = getCleanVisibleText(node.text);
+        node.displayText = display;
+        node.visLen = getVisibleTextLength(display);
+        node.wikiText = node.text;
+      } else {
+        node.displayText = node.text;
+        node.visLen = getVisibleTextLength(node.text);
+      }
     }
 
     if (o) {
       for (const node of nodes) {
-        if (node.children.length > 0 && !node.text.endsWith("/")) {
-          node.text += "/";
-          node.visLen = getVisibleTextLength(node.text);
+        if (node.children.length > 0 && !node.displayText.endsWith("/")) {
+          node.displayText += "/";
+          if (node.wikiText) node.wikiText += "/";
+          node.visLen = getVisibleTextLength(node.displayText);
         }
       }
     }
@@ -90,7 +100,7 @@ export function renderTreeSynoptic(
     for (const node of nodes) {
       const nodeX = colX.get(node.depth) || 0;
       const r = node.centerY;
-      const text = node.text;
+      const text = node.displayText;
       for (let k = 0; k < text.length; k++) {
         safeSetGrid(grid, r, nodeX + k, text[k], maxColX);
       }
@@ -151,6 +161,16 @@ export function renderTreeSynoptic(
       }
     }
 
+    // Build a map of row → { display, wikiText } replacements for wiki link nodes
+    const wikiReplacements = new Map<number, { display: string; wikiText: string }[]>();
+    for (const node of nodes) {
+      if (node.wikiText) {
+        const rowIdx = node.centerY;
+        if (!wikiReplacements.has(rowIdx)) wikiReplacements.set(rowIdx, []);
+        wikiReplacements.get(rowIdx)!.push({ display: node.displayText, wikiText: node.wikiText });
+      }
+    }
+
     const linesOutput = [];
     for (let r = 0; r < totalRows; r++) {
       const lineStr = grid[r].join("").replace(/\s+$/, "");
@@ -183,9 +203,17 @@ export function renderTreeSynoptic(
 
     for (let j = 0; j < linesOutput.length; j++) {
       const sp = document.createElement("span");
-      const lineText = linesOutput[j];
+      let lineText = linesOutput[j];
 
-      renderLineContent(sp, lineText, noteMapInfo, app);
+      // Restore wiki link syntax so renderLineContent can create clickable anchors
+      const replacements = wikiReplacements.get(j);
+      if (replacements) {
+        for (const r of replacements) {
+          lineText = lineText.replace(r.display, r.wikiText);
+        }
+      }
+
+      renderLineContent(sp, lineText, noteMapInfo, app, sourcePath);
 
       frag.appendChild(sp);
       if (j < linesOutput.length - 1) {

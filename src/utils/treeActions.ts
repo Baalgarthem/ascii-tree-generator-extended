@@ -1,5 +1,5 @@
 import { App, MarkdownPostProcessorContext, MarkdownView, TFile, setIcon, setTooltip } from "obsidian";
-import { getVisibleTextLength } from "./rendererUtils";
+import { getVisibleTextLength, getCleanVisibleText } from "./rendererUtils";
 
 export interface SourceTreeNode {
   rawLine: string;
@@ -15,12 +15,8 @@ export interface SourceTreeNode {
  */
 export function getCleanSortText(text: string): string {
   if (!text) return "";
-  // 1. [[target|display]] -> display, [[target]] -> target
-  let cleaned = text.replace(/\[\[([^\]\|]+)\|([^\]]+)\]\]/g, "$2");
-  cleaned = cleaned.replace(/\[\[([^\]]+)\]\]/g, "$1");
-  // 2. [display](url) -> display
-  cleaned = cleaned.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
-  // 3. Strip bold/italic/highlight/code markers
+  let cleaned = getCleanVisibleText(text);
+  // Strip bold/italic/highlight/code markers
   cleaned = cleaned.replace(/[*_~=`]/g, "");
   return cleaned.trim();
 }

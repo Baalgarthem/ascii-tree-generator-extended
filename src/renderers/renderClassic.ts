@@ -10,7 +10,8 @@ export function renderTreeClassic(
   dashCount: number, 
   noteMapInfo: any, 
   app: App,
-  t: (key: string) => string
+  t: (key: string) => string,
+  sourcePath: string = ""
 ): void {
   try {
     const o = settings.autoAppendSlash;
@@ -74,7 +75,7 @@ export function renderTreeClassic(
         sp.style.marginBottom = "var(--ascii-tree-title-margin-bottom, 12px)";
       }
 
-      renderLineContent(sp, lineText, noteMapInfo, app);
+      renderLineContent(sp, lineText, noteMapInfo, app, sourcePath);
 
       frag.appendChild(sp);
       if (j < ls.length - 1) {

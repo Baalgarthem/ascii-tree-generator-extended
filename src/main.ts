@@ -78,7 +78,8 @@ export default class AsciiTreeGeneratorExtended extends Plugin {
   }
 
   treeProcessor = (sourceText: string, containerEl: HTMLElement, ctx: MarkdownPostProcessorContext, mode: string | null = null) => {
-    this.renderedBlocks.set(containerEl, { sourceText, mode });
+    const sourcePath = ctx?.sourcePath || "";
+    this.renderedBlocks.set(containerEl, { sourceText, mode, sourcePath });
     if (ctx && ctx.addChild) {
       const comp = new Component();
       comp.onunload = () => {
@@ -95,15 +96,16 @@ export default class AsciiTreeGeneratorExtended extends Plugin {
   _renderTree(sourceText: string, containerEl: HTMLElement, ctx: MarkdownPostProcessorContext | null, modeOverride: string | null = null) {
     const a = this.settings.dashCount;
     const noteMapInfo = this.getVaultNoteMapInfo();
+    const sourcePath = ctx?.sourcePath || "";
 
     if (modeOverride === "v") {
-      return renderTreeVertical(sourceText, containerEl, this.settings, a, noteMapInfo, this.app, (key) => this.t(key));
+      return renderTreeVertical(sourceText, containerEl, this.settings, a, noteMapInfo, this.app, (key) => this.t(key), sourcePath);
     }
     if (modeOverride === "k") {
-      return renderTreeSynoptic(sourceText, containerEl, this.settings, a, noteMapInfo, this.app, (key) => this.t(key));
+      return renderTreeSynoptic(sourceText, containerEl, this.settings, a, noteMapInfo, this.app, (key) => this.t(key), sourcePath);
     }
 
-    return renderTreeClassic(sourceText, containerEl, this.settings, a, noteMapInfo, this.app, (key) => this.t(key));
+    return renderTreeClassic(sourceText, containerEl, this.settings, a, noteMapInfo, this.app, (key) => this.t(key), sourcePath);
   }
 
   applyCSSVars() {
@@ -121,7 +123,9 @@ export default class AsciiTreeGeneratorExtended extends Plugin {
       }
       const sourceText = typeof data === "string" ? data : data.sourceText;
       const mode = typeof data === "object" ? data.mode : null;
-      this._renderTree(sourceText, containerEl, null, mode);
+      const sourcePath = typeof data === "object" ? data.sourcePath || "" : "";
+      const mockCtx = { sourcePath } as any;
+      this._renderTree(sourceText, containerEl, mockCtx, mode);
     }
   }
 

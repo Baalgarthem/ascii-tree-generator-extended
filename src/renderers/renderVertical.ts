@@ -1,6 +1,6 @@
 import { App } from "obsidian";
 import { ORGANIGRAM_SYMBOLS } from "../constants/symbols";
-import { getVisibleTextLength, safeSetGrid, safeGetGrid, wrapText, renderLineContent, renderEmptyBlockPlaceholder } from "../utils/rendererUtils";
+import { getVisibleTextLength, getCleanVisibleText, safeSetGrid, safeGetGrid, wrapText, renderLineContent, renderEmptyBlockPlaceholder } from "../utils/rendererUtils";
 import { parseSourceText, buildNodeTree } from "../utils/treeParser";
 
 export function renderTreeVertical(
@@ -10,7 +10,8 @@ export function renderTreeVertical(
   dashCount: number, 
   noteMapInfo: any, 
   app: App,
-  t: (key: string) => string
+  t: (key: string) => string,
+  sourcePath: string = ""
 ): void {
   try {
     const o = settings.autoAppendSlash;
@@ -28,18 +29,17 @@ export function renderTreeVertical(
     // Add extra properties for Vertical render
     for (const node of nodes) {
       // Preserve wiki links (e.g., [[target|display]]) without wrapping, otherwise wrap normally
-        if (node.text.includes('[[') && node.text.includes(']]')) {
-          // Extract display text for layout; preserve full wiki syntax for link rendering
-          const match = node.text.match(/\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/);
-          const display = match ? (match[2] || match[1]) : node.text;
-          node.lines = [display];
-          node.visLen = getVisibleTextLength(display);
-          node.wikiText = node.text; // preserved for renderLineContent
-        } else {
-          const lines = wrapText(node.text, 24);
-          node.lines = lines;
-          node.visLen = Math.max(...lines.map((l: string) => getVisibleTextLength(l)));
-        }
+      if (node.text.includes('[[') && node.text.includes(']]')) {
+        // Extract display text for layout; preserve full wiki syntax for link rendering
+        const display = getCleanVisibleText(node.text);
+        node.lines = [display];
+        node.visLen = getVisibleTextLength(display);
+        node.wikiText = node.text; // preserved for renderLineContent
+      } else {
+        const lines = wrapText(node.text, 24);
+        node.lines = lines;
+        node.visLen = Math.max(...lines.map((l: string) => getVisibleTextLength(l)));
+      }
       node.startX = 0;
       node.centerX = 0;
       node.subtreeWidth = 0;
@@ -274,7 +274,7 @@ export function renderTreeVertical(
         }
       }
 
-      renderLineContent(sp, lineText, noteMapInfo, app);
+      renderLineContent(sp, lineText, noteMapInfo, app, sourcePath);
 
       frag.appendChild(sp);
       if (j < linesOutput.length - 1) {
