@@ -1,4 +1,4 @@
-import { Plugin, Component, Editor, MarkdownPostProcessorContext } from "obsidian";
+import { Plugin, Component, Editor, MarkdownPostProcessorContext, MarkdownPreviewRenderer } from "obsidian";
 import { TRANSLATIONS } from "./constants/translations";
 import { DEFAULT_SETTINGS, AsciiTreeSettings } from "./settings/defaultSettings";
 import { AsciiTreeSettingTab } from "./settings/SettingsTab";
@@ -7,34 +7,70 @@ import { renderTreeVertical } from "./renderers/renderVertical";
 import { renderTreeSynoptic } from "./renderers/renderSynoptic";
 import { addCodeblockActions } from "./utils/treeActions";
 
+function debugLog(msg: string) {
+  try {
+    const fs = typeof window !== "undefined" && (window as any).require ? (window as any).require("fs") : (typeof require !== "undefined" ? require("fs") : null);
+    if (fs && fs.appendFileSync) {
+      fs.appendFileSync("D:/PKM/ascii-debug.log", `[${new Date().toISOString()}] ${msg}\n`);
+    }
+  } catch (e) {
+    console.error("[ASCII-DEBUG] Logging failed:", e);
+  }
+}
+debugLog("AsciiTreeGeneratorExtended: top-level module code loaded");
+
 export default class AsciiTreeGeneratorExtended extends Plugin {
   settings!: AsciiTreeSettings;
   renderedBlocks: Map<HTMLElement, any> = new Map();
   _cachedNoteMapInfo: any = null;
 
+  constructor(app: any, manifest: any) {
+    super(app, manifest);
+    debugLog("AsciiTreeGeneratorExtended: constructor called with id=" + manifest?.id);
+  }
+
   async onload() {
-    await this.loadSettings();
-    this.applyCSSVars();
-    this.addSettingTab(new AsciiTreeSettingTab(this.app, this as any));
+    debugLog("AsciiTreeGeneratorExtended: onload START");
+    try {
+      debugLog("AsciiTreeGeneratorExtended: loading settings...");
+      await this.loadSettings();
+      debugLog("AsciiTreeGeneratorExtended: settings loaded: " + JSON.stringify(this.settings));
 
-    if (this.app && this.app.vault) {
-      this.registerEvent(this.app.vault.on("create", () => this.invalidateNoteMapCache()));
-      this.registerEvent(this.app.vault.on("delete", () => this.invalidateNoteMapCache()));
-      this.registerEvent(this.app.vault.on("rename", () => this.invalidateNoteMapCache()));
-    }
-    if (this.app && this.app.metadataCache) {
-      this.registerEvent(this.app.metadataCache.on("changed", () => this.invalidateNoteMapCache()));
-    }
+      debugLog("AsciiTreeGeneratorExtended: applying CSS vars...");
+      this.applyCSSVars();
 
-    this.registerMarkdownCodeBlockProcessor("tree", (sourceText, containerEl, ctx) => {
-      this.treeProcessor(sourceText, containerEl, ctx, null);
-    });
-    this.registerMarkdownCodeBlockProcessor("tree-v", (sourceText, containerEl, ctx) => {
-      this.treeProcessor(sourceText, containerEl, ctx, "v");
-    });
-    this.registerMarkdownCodeBlockProcessor("tree-k", (sourceText, containerEl, ctx) => {
-      this.treeProcessor(sourceText, containerEl, ctx, "k");
-    });
+      debugLog("AsciiTreeGeneratorExtended: adding setting tab...");
+      this.addSettingTab(new AsciiTreeSettingTab(this.app, this as any));
+
+      debugLog("AsciiTreeGeneratorExtended: registering vault/cache events...");
+      if (this.app && this.app.vault) {
+        this.registerEvent(this.app.vault.on("create", () => this.invalidateNoteMapCache()));
+        this.registerEvent(this.app.vault.on("delete", () => this.invalidateNoteMapCache()));
+        this.registerEvent(this.app.vault.on("rename", () => this.invalidateNoteMapCache()));
+      }
+      if (this.app && this.app.metadataCache) {
+        this.registerEvent(this.app.metadataCache.on("changed", () => this.invalidateNoteMapCache()));
+      }
+
+      debugLog("AsciiTreeGeneratorExtended: ensuring previous processors are cleaned up...");
+      try {
+        (MarkdownPreviewRenderer as any).unregisterCodeBlockPostProcessor("tree");
+        (MarkdownPreviewRenderer as any).unregisterCodeBlockPostProcessor("tree-v");
+        (MarkdownPreviewRenderer as any).unregisterCodeBlockPostProcessor("tree-k");
+      } catch (e) {
+        debugLog("AsciiTreeGeneratorExtended: cleanup note: " + e);
+      }
+
+      debugLog("AsciiTreeGeneratorExtended: registering code block processors...");
+      this.registerMarkdownCodeBlockProcessor("tree", (sourceText, containerEl, ctx) => {
+        this.treeProcessor(sourceText, containerEl, ctx, null);
+      });
+      this.registerMarkdownCodeBlockProcessor("tree-v", (sourceText, containerEl, ctx) => {
+        this.treeProcessor(sourceText, containerEl, ctx, "v");
+      });
+      this.registerMarkdownCodeBlockProcessor("tree-k", (sourceText, containerEl, ctx) => {
+        this.treeProcessor(sourceText, containerEl, ctx, "k");
+      });
 
     this.addCommand({
       id: "convert-to-tree-block",
@@ -56,11 +92,20 @@ export default class AsciiTreeGeneratorExtended extends Plugin {
       name: "Convert tree block back to text",
       editorCallback: (e) => { this.removeTreeBlock(e); }
     });
-    this.addCommand({
-      id: "toggle-tree-block",
-      name: "Toggle tree block",
-      editorCallback: (e) => { this.toggleTreeBlock(e); }
-    });
+      this.addCommand({
+        id: "toggle-tree-block",
+        name: "Toggle tree block",
+        editorCallback: (e) => { this.toggleTreeBlock(e); }
+      });
+      debugLog("AsciiTreeGeneratorExtended: onload FINISHED SUCCESSFULLY!");
+    } catch (err: any) {
+      debugLog("AsciiTreeGeneratorExtended: ONLOAD FAILED WITH ERROR: " + (err?.stack || err?.message || String(err)));
+      throw err;
+    }
+  }
+
+  onunload() {
+    debugLog("AsciiTreeGeneratorExtended: onunload called");
   }
 
   async loadSettings() {
@@ -89,7 +134,7 @@ export default class AsciiTreeGeneratorExtended extends Plugin {
     }
     this._renderTree(sourceText, containerEl, ctx, mode);
     if (ctx) {
-      addCodeblockActions(this.app, containerEl, ctx, mode, sourceText, (key) => this.t(key));
+      addCodeblockActions(this.app, containerEl, ctx, mode, sourceText, (key) => this.t(key), this);
     }
   };
 
@@ -113,6 +158,7 @@ export default class AsciiTreeGeneratorExtended extends Plugin {
     const spacing = this.settings.titleSpacing ?? 12;
     root.style.setProperty("--ascii-tree-title-font-size", this.settings.titleFontSize || "1.15em");
     root.style.setProperty("--ascii-tree-title-margin-bottom", spacing + "px");
+    root.style.setProperty("--ascii-tree-fs-pulse-color", this.settings.overflowPulseColor || "#e5a50a");
   }
 
   rerenderAllBlocks() {

@@ -175,5 +175,63 @@ export class AsciiTreeSettingTab extends PluginSettingTab {
             this.plugin.updateHoverClasses();
           })
       );
+
+    containerEl.createEl("h3", { text: T("sectionFullscreen") });
+
+    new Setting(containerEl)
+      .setName(T("fullscreenNavButtonsName"))
+      .setDesc(T("fullscreenNavButtonsDesc"))
+      .addDropdown((s) =>
+        s
+          .addOption("always", T("btnOptAlways"))
+          .addOption("mobile", T("btnOptMobile"))
+          .addOption("never",  T("btnOptNever"))
+          .setValue(this.plugin.settings.fullscreenNavButtons || "always")
+          .onChange(async (value: any) => {
+            this.plugin.settings.fullscreenNavButtons = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName(T("fullscreenZoomButtonsName"))
+      .setDesc(T("fullscreenZoomButtonsDesc"))
+      .addDropdown((s) =>
+        s
+          .addOption("always", T("btnOptAlways"))
+          .addOption("mobile", T("btnOptMobile"))
+          .addOption("never",  T("btnOptNever"))
+          .setValue(this.plugin.settings.fullscreenZoomButtons || "always")
+          .onChange(async (value: any) => {
+            this.plugin.settings.fullscreenZoomButtons = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName(T("enableOverflowPulseName"))
+      .setDesc(T("enableOverflowPulseDesc"))
+      .addToggle((s) =>
+        s
+          .setValue(this.plugin.settings.enableOverflowPulse ?? true)
+          .onChange(async (value) => {
+            this.plugin.settings.enableOverflowPulse = value;
+            await this.plugin.saveSettings();
+            this.plugin.rerenderAllBlocks();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName(T("overflowPulseColorName"))
+      .setDesc(T("overflowPulseColorDesc"))
+      .addColorPicker((s) =>
+        s
+          .setValue(this.plugin.settings.overflowPulseColor || "#e5a50a")
+          .onChange(async (value) => {
+            this.plugin.settings.overflowPulseColor = value;
+            await this.plugin.saveSettings();
+            this.plugin.applyCSSVars();
+          })
+      );
   }
 }

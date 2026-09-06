@@ -1,5 +1,55 @@
+# Dependencias
 node_modules/
+
+# Sourcemaps
+*.map
 main.js.map
 styles.css.map
+
+# Documentación local
 docs/
+
+# Referencias, bocetos y temporales
+.referencias/
+.references/
+referencias/
+references/
+scratch/
+*.tmp
+*.bak
+
+# Logs de depuración y ejecución
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de configuración local de Obsidian
+.obsidian/
+data.json
+
+# Entornos locales
+.env
+.env.local
+.env.*.local
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Metadatos del Sistema Operativo (Windows & macOS)
+desktop.ini
+*/desktop.ini
+**/desktop.ini
+Thumbs.db
+ehthumbs.db
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes

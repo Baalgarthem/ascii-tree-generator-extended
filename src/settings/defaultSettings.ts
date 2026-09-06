@@ -12,6 +12,10 @@ export interface AsciiTreeSettings {
   enableTitleFormat: boolean;
   titleFontSize: string;
   titleSpacing: number;
+  fullscreenNavButtons: "always" | "mobile" | "never";
+  fullscreenZoomButtons: "always" | "mobile" | "never";
+  enableOverflowPulse: boolean;
+  overflowPulseColor: string;
 }
 
 export const DEFAULT_SETTINGS: AsciiTreeSettings = {
@@ -27,5 +31,9 @@ export const DEFAULT_SETTINGS: AsciiTreeSettings = {
   linkHoverStyle: "bold",
   enableTitleFormat: true,
   titleFontSize: "1.15em",
-  titleSpacing: 12
+  titleSpacing: 12,
+  fullscreenNavButtons: "always",
+  fullscreenZoomButtons: "always",
+  enableOverflowPulse: true,
+  overflowPulseColor: "#e5a50a"
 };

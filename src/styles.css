@@ -77,6 +77,38 @@ div[class*="block-language-tree"]:hover .ascii-tree-codeblock-actions,
   display: block;
 }
 
+/* ── Fullscreen Button Overflow Pulse Animation ────────────────── */
+@keyframes asciiTreePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ascii-tree-fs-pulse-color, #e5a50a) 40%, transparent);
+    border-color: var(--ascii-tree-fs-pulse-color, #e5a50a);
+    color: var(--ascii-tree-fs-pulse-color, #e5a50a);
+  }
+  50% {
+    box-shadow: 0 0 5px color-mix(in srgb, var(--ascii-tree-fs-pulse-color, #e5a50a) 70%, transparent);
+    border-color: var(--ascii-tree-fs-pulse-color, #e5a50a);
+    color: var(--ascii-tree-fs-pulse-color, #e5a50a);
+    background-color: color-mix(in srgb, var(--ascii-tree-fs-pulse-color, #e5a50a) 12%, var(--background-primary));
+  }
+}
+
+.ascii-tree-action-btn.ascii-tree-btn-pulse {
+  animation: asciiTreePulse 1.8s infinite ease-in-out;
+  border-color: var(--ascii-tree-fs-pulse-color, #e5a50a) !important;
+  color: var(--ascii-tree-fs-pulse-color, #e5a50a) !important;
+}
+
+/* Ensure toolbar stays visible when fullscreen button is pulsing */
+.block-language-tree:has(.ascii-tree-btn-pulse) .ascii-tree-codeblock-actions,
+.block-language-tree-v:has(.ascii-tree-btn-pulse) .ascii-tree-codeblock-actions,
+.block-language-tree-k:has(.ascii-tree-btn-pulse) .ascii-tree-codeblock-actions,
+div[class*="block-language-tree"]:has(.ascii-tree-btn-pulse) .ascii-tree-codeblock-actions,
+.ascii-tree-wrapper:has(.ascii-tree-btn-pulse) .ascii-tree-codeblock-actions,
+.ascii-tree-codeblock-actions:has(.ascii-tree-btn-pulse) {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 /* ── Disable line numbers in Reading View & Preview ───────────── */
 .markdown-rendered pre.ascii-tree-block,
 .markdown-preview-view pre.ascii-tree-block,
@@ -264,4 +296,237 @@ pre.ascii-tree-block .ascii-tree-hover-underline-wrapper .glossary-link {
     0 0 5px color-mix(in srgb, var(--interactive-accent, #705dcf) 60%, transparent),
     0 0 12px color-mix(in srgb, var(--interactive-accent, #705dcf) 30%, transparent);
   text-decoration: none;
+}
+
+/* ═════════════════════════════════════════════════════════════════ */
+/* ── FULLSCREEN MODAL & INTERACTIVE CONTROLS ───────────────────── */
+/* ═════════════════════════════════════════════════════════════════ */
+
+/* Modal container override for true fullscreen */
+.modal-container:has(.ascii-tree-fullscreen-modal-window),
+.modal-container.ascii-tree-fs-active {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+}
+
+.ascii-tree-fullscreen-modal-window {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background-color: var(--background-primary) !important;
+  box-shadow: none !important;
+  z-index: 100 !important;
+}
+
+/* Ocultar completamente el botón de cerrar nativo superior derecho para que solo prevalezca el de la barra inferior */
+.modal-container.ascii-tree-fs-active .modal-close-button,
+.modal-container:has(.ascii-tree-fullscreen-modal-window) .modal-close-button,
+.ascii-tree-fullscreen-modal-window .modal-close-button,
+.ascii-tree-fullscreen-modal-window ~ .modal-close-button,
+.ascii-tree-fs-hide-close {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+.ascii-tree-fullscreen-modal-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* ── Central Viewport Zone (Panel de Vista Previa Aislado) ─────── */
+.ascii-tree-fs-viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden; /* El diagrama nunca sale de esta zona ni invade los botones */
+  cursor: grab;
+  background-color: var(--background-primary);
+  user-select: none;
+}
+
+.ascii-tree-fs-viewport.is-dragging {
+  cursor: grabbing !important;
+}
+
+.ascii-tree-fs-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  transition: transform 0.04s ease-out;
+  will-change: transform;
+}
+
+.ascii-tree-fs-diagram {
+  padding: 40px;
+  display: inline-block;
+}
+
+.ascii-tree-fs-diagram pre.ascii-tree-block {
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  user-select: text;
+}
+
+/* ── Bottom bar (Única barra inferior horizontal con todos los controles) ── */
+.ascii-tree-fs-bottombar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: var(--background-secondary);
+  border-top: 1px solid var(--background-modifier-border);
+  z-index: 30;
+  flex-shrink: 0;
+}
+
+.ascii-tree-fs-bottombar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.ascii-tree-fs-ctrl-group {
+  display: flex;
+  align-items: center;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  padding: 2px 4px;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ascii-tree-fs-ctrl-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  min-width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 6px;
+  transition: all 0.12s ease;
+  font-size: 0.85em;
+  font-weight: 500;
+  gap: 6px;
+}
+
+.ascii-tree-fs-ctrl-btn:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.ascii-tree-fs-ctrl-btn:active {
+  transform: scale(0.92);
+}
+
+.ascii-tree-fs-btn-label {
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.ascii-tree-fs-btn-reset-zoom {
+  padding: 4px 10px;
+  font-family: var(--font-monospace);
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.ascii-tree-fs-btn-reset-zoom:hover {
+  color: var(--interactive-accent);
+}
+
+.ascii-tree-fs-btn-center {
+  padding: 4px 10px;
+}
+
+.ascii-tree-fs-btn-center-label {
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.ascii-tree-fs-bar-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--background-modifier-border);
+  margin: 0 4px;
+}
+
+/* ── Botón de Cerrar con Contorno Rojo (Último botón de la barra) ─── */
+.ascii-tree-fs-close-group {
+  border-color: color-mix(in srgb, var(--text-error, #e53935) 40%, var(--background-modifier-border)) !important;
+}
+
+.ascii-tree-fs-btn-close-red {
+  color: var(--text-error, #e53935) !important;
+  border: 1.5px solid var(--text-error, #e53935) !important;
+  border-radius: 6px !important;
+  font-weight: bold !important;
+  transition: all 0.15s ease !important;
+}
+
+.ascii-tree-fs-btn-close-red:hover {
+  background-color: color-mix(in srgb, var(--text-error, #e53935) 15%, transparent) !important;
+  color: var(--text-error, #e53935) !important;
+  border-color: var(--text-error, #e53935) !important;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--text-error, #e53935) 45%, transparent) !important;
+}
+
+.ascii-tree-fs-btn-close-red:active {
+  transform: scale(0.92) !important;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 600px) {
+  .ascii-tree-fs-btn-label,
+  .ascii-tree-fs-btn-center-label {
+    display: none;
+  }
+
+  .ascii-tree-fs-bottombar {
+    padding: 8px 12px;
+  }
+
+  .ascii-tree-fs-bottombar-inner {
+    gap: 6px;
+  }
 }

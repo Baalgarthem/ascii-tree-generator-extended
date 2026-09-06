@@ -1,5 +1,6 @@
-import { App, MarkdownPostProcessorContext, MarkdownView, TFile, setIcon, setTooltip } from "obsidian";
+import { App, Component, MarkdownPostProcessorContext, MarkdownView, TFile, setIcon, setTooltip } from "obsidian";
 import { getVisibleTextLength, getCleanVisibleText } from "./rendererUtils";
+import { FullscreenTreeModal } from "../components/FullscreenTreeModal";
 
 export interface SourceTreeNode {
   rawLine: string;
@@ -309,7 +310,8 @@ export function addCodeblockActions(
   ctx: MarkdownPostProcessorContext,
   currentMode: string | null,
   sourceText: string,
-  t: (key: string) => string
+  t: (key: string) => string,
+  plugin?: any
 ): void {
   // Container wrapper class
   containerEl.addClass("ascii-tree-wrapper");
@@ -360,4 +362,52 @@ export function addCodeblockActions(
       console.error("[ASCII Tree EX] Error cycling tree mode:", err);
     }
   });
+
+  // 3. Fullscreen Button (Pantalla Completa)
+  const fsBtn = toolbar.createEl("button", {
+    cls: "ascii-tree-action-btn ascii-tree-btn-fullscreen",
+    attr: { type: "button", "aria-label": t("fullscreenTooltip") }
+  });
+  setIcon(fsBtn, "maximize");
+  setTooltip(fsBtn, t("fullscreenTooltip"));
+
+  fsBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const sourcePath = ctx?.sourcePath || "";
+    const modal = new FullscreenTreeModal(app, plugin || { t, settings: {} }, sourceText, currentMode, sourcePath);
+    modal.open();
+  });
+
+  // 4. Overflow Detection -> Trigger pulsing alert on Fullscreen button
+  const checkOverflow = () => {
+    if (plugin?.settings?.enableOverflowPulse === false) {
+      fsBtn.removeClass("ascii-tree-btn-pulse");
+      return;
+    }
+    const preEl = containerEl.querySelector("pre.ascii-tree-block");
+    if (preEl) {
+      const isOverflowing = preEl.scrollWidth > preEl.clientWidth + 2;
+      if (isOverflowing) {
+        fsBtn.addClass("ascii-tree-btn-pulse");
+      } else {
+        fsBtn.removeClass("ascii-tree-btn-pulse");
+      }
+    }
+  };
+
+  setTimeout(checkOverflow, 60);
+  setTimeout(checkOverflow, 300);
+
+  if (typeof ResizeObserver !== "undefined") {
+    const observer = new ResizeObserver(() => {
+      checkOverflow();
+    });
+    observer.observe(containerEl);
+    if (ctx && ctx.addChild) {
+      const comp = new Component();
+      comp.onunload = () => observer.disconnect();
+      ctx.addChild(comp);
+    }
+  }
 }
