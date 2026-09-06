@@ -17,6 +17,7 @@
 // No se realiza "git push" automáticamente; el usuario puede empujar manualmente.
 
 import { execSync } from "child_process";
+import fs from "fs";
 
 /**
  * Ejecuta un comando del sistema y muestra una descripción clara.
@@ -56,7 +57,7 @@ function principal() {
   ejecutar(`git commit -m "${mensaje}"`, "Commit de los cambios de versionado y build");
 
   // 5️⃣ Creación del tag con la nueva versión
-  const nuevaVersion = JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version;
+  const nuevaVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
   ejecutar(`git tag ${nuevaVersion}`, "Creación del tag de versión");
 
   console.log("\n=== Release manual completado ===");
